@@ -240,8 +240,19 @@ int main(int argc, char *argv[]) {
   else if (strstr(card,"REDL") || strstr(card,"redl")) ts.chip=1;
   else if (strstr(card,"REDU") || strstr(card,"redu")) ts.chip=2;
   else {
-    INCLOSE; errormsg("Do not understand value of header card %s from file\n\t%s",
-		      "OBJECT",infile);
+    /* v0.55: ESO changed the (silly) use of the OBJECT card and now
+       use the following card to identify which chip is being analysed */
+    if (fits_read_key(infits,TSTRING,"HIERARCH ESO PRO CATG",card,comment,&status)) {
+      INCLOSE; errormsg("Cannot read value of header card %s from file\n\t%s",
+			"HIERARCH ESO PRO CATG",infile);
+    }
+    if (strstr(card,"BLUE") || strstr(card,"blue")) ts.chip=0;
+    else if (strstr(card,"REDL") || strstr(card,"redl")) ts.chip=1;
+    else if (strstr(card,"REDU") || strstr(card,"redu")) ts.chip=2;
+    else {
+      INCLOSE; errormsg("Do not understand values of header cards\n\
+\t%s or %s\n\tfrom file\n\t%s","OBJECT","HIERARCH ESO PRO CATG",infile);
+    }
   }
   /* Read binning values */
   if (fits_read_key(infits,TINT,"HIERARCH ESO DET WIN1 BINX",&ts.biny,comment,
