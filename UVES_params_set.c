@@ -6,6 +6,8 @@
 
 int UVES_params_set(calprd *cprd) {
 
+  if (cprd->nhrsacal_f==-1.0) cprd->nhrsacal_f=NHRSACAL_F;
+  if (cprd->nhrsacal_b==-1.0) cprd->nhrsacal_b=NHRSACAL_B;
   if (cprd->nhrscal_f==-1.0) cprd->nhrscal_f=NHRSCAL_F;
   if (cprd->nhrscal_b==-1.0) cprd->nhrscal_b=NHRSCAL_B;
   if (cprd->nbias==-1) cprd->nbias=NBIAS;

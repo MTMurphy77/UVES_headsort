@@ -5,17 +5,14 @@ IP_NAME = UVES_itphmod
 WR_NAME = UVES_wavres
 
 # Linux
+# NOTE: Change compilation command for "UVES_popler" below to use
+# $(FC) for compilation and linking as well.
 #SHELL = tcsh
 #CC = gcc
-#CFLAGS = -O2 -Wall -I./
-#LIBS += -lm -lcfitsio
+#FC = gfortran
+#CFLAGS = -I${CFITSIO_DIR}/include -O2 -Wall -I./
+#LIBS = -L${CFITSIO_DIR}/lib -lm -lcfitsio
 #TARGET = ${HOME}/bin
-
-# Solaris
-#CC = gcc
-#CFLAGS = -O2 -Wall -I./
-#LIBS = -lm -lcfitsio -lsocket -lnsl
-#HS_TARGET = ${HOME}/bin/UVES_headsort
 
 # Mac OS X - assumes CFITSIO was installed through MacPorts.
 SHELL = tcsh
@@ -38,15 +35,19 @@ all: $(HS_NAME) $(CH_NAME) $(IP_NAME) $(WR_NAME)
 
 $(HS_NAME): $(HS_OBJECTS)
 	$(CC) -o $(HS_NAME) $(HS_OBJECTS) $(LIBS)
+#	$(FC) -o $(HS_NAME) $(HS_OBJECTS) $(LIBS)
 
 $(CH_NAME): $(CH_OBJECTS)
 	$(CC) -o $(CH_NAME) $(CH_OBJECTS) $(LIBS)
+#	$(FC) -o $(CH_NAME) $(CH_OBJECTS) $(LIBS)
 
 $(IP_NAME): $(IP_OBJECTS)
 	$(CC) -o $(IP_NAME) $(IP_OBJECTS) $(LIBS)
+#	$(FC) -o $(IP_NAME) $(IP_OBJECTS) $(LIBS)
 
 $(WR_NAME): $(WR_OBJECTS)
 	$(CC) -o $(WR_NAME) $(WR_OBJECTS) $(LIBS)
+#	$(FC) -o $(WR_NAME) $(WR_OBJECTS) $(LIBS)
 
 install:
 	/bin/cp -f $(HS_NAME) $(CH_NAME) $(IP_NAME) $(WR_NAME) $(UTILS) $(TARGET)

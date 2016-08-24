@@ -25,11 +25,15 @@ void usage(void) {
 \theader-card values\n",progname);
 
   fprintf(stderr,"\nBy Michael Murphy (http://www.ast.cam.ac.uk/~mim)\n\
-\nVersion: %4.2lf (03rd June 2013)\n",VERSION);
+\nVersion: %4.2lf (24 Aug 2016)\n",VERSION);
 
   fprintf(stderr,"\nUsage: %s [OPTIONS] [FITS file or list]\n", progname);
 
   fprintf(stderr, "\nOptions:\n\
+  -a    = %4.1lf %4.1lf : Attached calibration period: Number of hours before\n\
+                       and after science exposures to searh for wav. cal.s with\n\
+                       same grating encoder value. If none found then normal\n\
+                       cal. period (-c option) is used silently.\n\
   -c    = %4.1lf %4.1lf : Calibration period: Number of hours before and after\n\
                        science exposures to search for calibration exposures.\n\
   -bias = %1d         : Number of biases: Collect N biases per science exposure.\n\
@@ -66,8 +70,8 @@ void usage(void) {
   -d                : Debug mode: search for errors associated with given\n\
                        files; don't create any direcories, links or files.\n\
   -h, -help         : Print this message.\n\n",
-	  NHRSCAL_B,NHRSCAL_F,NBIAS,NFLAT,NWAV,NORD,NFMT,NSTD,THARFILE,ATMOFILE,
-	  FLSTFILE);
+	  NHRSACAL_B,NHRSACAL_F,NHRSCAL_B,NHRSCAL_F,NBIAS,NFLAT,NWAV,NORD,NFMT,NSTD,
+	  THARFILE,ATMOFILE,FLSTFILE);
   exit(3);
 }
 
@@ -108,6 +112,10 @@ int main(int argc, char *argv[]) {
   /* Scan command line for options */
   while (++i<argc) {
     if (!strcmp(argv[i],"-d")) debug=1; /* Enter debug mode */
+    else if (!strcmp(argv[i],"-a")) {
+      if (sscanf(argv[++i],"%lf",&(cprd.nhrsacal_b))!=1) usage();
+      if (sscanf(argv[++i],"%lf",&(cprd.nhrsacal_f))!=1) usage();
+    }
     else if (!strcmp(argv[i],"-c")) {
       if (sscanf(argv[++i],"%lf",&(cprd.nhrscal_b))!=1) usage();
       if (sscanf(argv[++i],"%lf",&(cprd.nhrscal_f))!=1) usage();
@@ -167,8 +175,15 @@ int main(int argc, char *argv[]) {
   if (!strncmp(infile,"\0",1)) usage();
   /* Set any unset parameters */
   if (!UVES_params_set(&cprd)) errormsg("Error returned from UVES_params_set()");
+
+  /* Check that the attached calibration period is shorter than the normal one */
+  if (cprd.nhrsacal_b>cprd.nhrscal_b || cprd.nhrsacal_f>cprd.nhrscal_f)
+    errormsg("Calibration period for attached wavelength calibrations\n\
+\t(currently -a %4.1lf %4.1lf) is outside normal calibration period\n\
+\t(currently -c %4.1lf %4.1lf).",cprd.nhrsacal_b,cprd.nhrsacal_f,
+	     cprd.nhrscal_b,cprd.nhrscal_f);
  
-  /* Temporary warning messaage if number of standards requested is > 1 */
+  /* Temporary warning message if number of standards requested is > 1 */
   if (cprd.nstd>1) {
     warnmsg("At present, there is no provision for selecting more\n\
 \tthan 1 standard exposure per science exposure. Continuing to run with\n\
@@ -198,7 +213,8 @@ int main(int argc, char *argv[]) {
   if (ncal>NCALMAX) errormsg("To many calibrations requested, %d.\n\
 \tIncrease NCALMAX in UVES_headsort.h");
 
-  /* Convert calibration period to days and find _total_ cal. preiod*/
+  /* Convert calibration periods to days */
+  cprd.ndsacal_f=cprd.nhrsacal_f/24.0; cprd.ndsacal_b=cprd.nhrsacal_b/24.0;
   cprd.ndscal_f=cprd.nhrscal_f/24.0; cprd.ndscal_b=cprd.nhrscal_b/24.0;
   
   /* Open input file, see if it's a list of FITS files or a FITS file iself */

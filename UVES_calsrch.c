@@ -193,60 +193,46 @@ int UVES_calsrch(header *hdrs, int nhdrs, scihdr *scis, int nscis,
 		cprd->nwav,ncsrch,scis[i].hdr.file);
       /* Sort the cal. search array in order of increasing DMJD */
       qsort(csrch,ncsrch,sizeof(calsrch),qsort_calsrch);
-      /* Fill the wavelength calibration index array with relevant file numbers */
       scis[i].nw=MIN(ncsrch,cprd->nwav);
-      /* Out of the first two relavant WAVs, give preference to the
-	 one with the same grating encoder value and, if both have
-	 that encoder value, select the first one after the science
-	 exposure to ensure that "attached" ThAr exposures are used
-	 when available. This algorithm could certainly be improved
-	 (e.g. using the first two WAVs is arbitrary). */
-      if (scis[i].nw && ncsrch>1) {
-	if (hdrs[csrch[0].ind].enc==scis[i].hdr.enc &&
-	    hdrs[csrch[1].ind].enc==scis[i].hdr.enc) {
-	  /* When encoder values are the same, select the first ThAr
-	     frame after the science frame silently */
-	  if (hdrs[csrch[0].ind].mjd>=scis[i].hdr.mjd_e &&
-	      hdrs[csrch[1].ind].mjd>=scis[i].hdr.mjd_e) {
-	    if (hdrs[csrch[0].ind].mjd<hdrs[csrch[1].ind].mjd) {
-	      scis[i].wind[0]=csrch[0].ind;
-	      if (scis[i].nw>1) scis[i].wind[1]=csrch[1].ind;
-	    } else {
-	      scis[i].wind[0]=csrch[1].ind;
-	      if (scis[i].nw>1) scis[i].wind[1]=csrch[0].ind;
-	    }
-	  } else if (hdrs[csrch[0].ind].mjd>=scis[i].hdr.mjd_e) {
-	    scis[i].wind[0]=csrch[0].ind;
-	    if (scis[i].nw>1) scis[i].wind[1]=csrch[1].ind;
-	  } else if (hdrs[csrch[1].ind].mjd>=scis[i].hdr.mjd_e) {
-	    scis[i].wind[0]=csrch[1].ind;
-	    if (scis[i].nw>1) scis[i].wind[1]=csrch[0].ind;
-	  } else {
-	    if (hdrs[csrch[0].ind].mjd>hdrs[csrch[1].ind].mjd) {
-	      scis[i].wind[0]=csrch[0].ind;
-	      if (scis[i].nw>1) scis[i].wind[1]=csrch[1].ind;
-	    } else {
-	      scis[i].wind[0]=csrch[1].ind;
-	      if (scis[i].nw>1) scis[i].wind[1]=csrch[0].ind;
-	    }
-	  }
-	} else if (hdrs[csrch[1].ind].enc==scis[i].hdr.enc) {
-	  scis[i].wind[0]=csrch[1].ind;
-	  if (scis[i].nw>1) scis[i].wind[1]=csrch[0].ind;
-	  warnmsg("UVES_calsrch(): Selected WAV frame\n\t%s,\n\
-\twhich has a time difference of %lf hrs relative to science frame\n\t%s,\n \
-\trather than WAV frame\n\t%s,\n\twhose time difference is %lf hrs, because\n\
-\tthe former has the same grating encoder value as the science frame.",
-		  hdrs[csrch[1].ind].file,csrch[1].dmjd*24.0,scis[i].hdr.file,
-		  hdrs[csrch[0].ind].file,csrch[0].dmjd*24.0);
-	} else {
-	  scis[i].wind[0]=csrch[0].ind;
-	  if (scis[i].nw>1) scis[i].wind[1]=csrch[1].ind;
+      /* Check whether there are any wavelength cals within the
+	 attached calibration period which have the same encoder value
+	 as the science exposures. If a cal was taken within 1/5th of
+	 the (forward) attached cal period of the (calculated) end of
+	 the science exposure, that is taken as the best calibration
+	 file to use. Otherwise the attached cal closest in time to
+	 the science exposure (within the attached cal period) is
+	 selected. */
+      if (ncsrch>1) {
+	/* First check for att cal within 1/5th of att cal period after sci */
+	j=0; k=-1; while (j<ncsrch && k==-1 && csrch[j].dmjd<0.2*cprd->ndsacal_f) {
+	  if (scis[i].hdr.mjd_e<hdrs[csrch[j].ind].mjd &&
+	      scis[i].hdr.enc==hdrs[csrch[j].ind].enc) k=j;
+	  j++;
 	}
-      } else {
-	scis[i].wind[0]=csrch[0].ind; if (scis[i].nw>1) scis[i].wind[1]=csrch[1].ind;
-      }
-      for (j=2; j<scis[i].nw; j++) scis[i].wind[j]=csrch[j].ind;
+	/* Now see if there's any within the full att cal period & select closest */
+	if (k==-1) {
+	  j=0; while (j<ncsrch && k==-1) {
+	    if (scis[i].hdr.enc==hdrs[csrch[j].ind].enc &&
+		((scis[i].hdr.mjd_e<hdrs[csrch[j].ind].mjd &&
+		  csrch[j].dmjd<cprd->ndsacal_f) ||
+		 (scis[i].hdr.mjd>hdrs[csrch[j].ind].mjd_e &&
+		  csrch[j].dmjd<cprd->ndsacal_b))) k=j;
+	    j++;
+	  }
+	}
+	/* If either of the above checks identified a better cal than
+	   just the closest one (in time) to the science exposure, put
+	   it at the top of the list (and reorder the rest of the
+	   list) */
+	if (k>=0) {
+	  scis[i].wind[0]=csrch[k].ind; j=1;
+	} else j=0;
+	/* Fill the wav index array with relevant file numbers */
+	while (j<scis[i].nw) {
+	  if (j!=k) scis[i].wind[j]=csrch[j].ind;
+	  j++;
+	}
+      } else scis[i].wind[0]=csrch[0].ind;
     }
     else if (!cprd->nwav) scis[i].nw=0;
 

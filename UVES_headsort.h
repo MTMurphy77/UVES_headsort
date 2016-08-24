@@ -9,13 +9,15 @@
 
 /* DEFINITIONS */
 /* Version number */
-#define VERSION    0.55
+#define VERSION    0.56
 
 /* Functions */
 #define MAX(a,b)   a>b ? a : b
 #define MIN(a,b)   a<b ? a : b
 
 #define BORR     500.0  /* Cross-over wavelength (nm) for blue/red settings  */
+#define NHRSACAL_B 2.0  /* Default backward # hours to search for att. cal. files */
+#define NHRSACAL_F 4.0  /* Default forward # hours to search for att. cal. files  */
 #define NHRSCAL_B 12.0  /* Default backward # hours to search for cal. files */
 #define NHRSCAL_F 12.0  /* Default forward # hours to search for cal. files  */
                   /* Following integer must be < 100      */
@@ -94,8 +96,12 @@ typedef struct SciHdr {
 } scihdr;
 
 typedef struct CalPrd {
+  double   nhrsacal_f;  /* Number of hours for future attached cal. period   */
+  double   nhrsacal_b;  /* Number of hours for backward attached cal. period */
   double   nhrscal_f;   /* Number of hours for future cal. period            */
   double   nhrscal_b;   /* Number of hours for backward cal. period          */
+  double   ndsacal_f;   /* Number of days for attached future cal. period    */
+  double   ndsacal_b;   /* Number of days for attached backward cal. period  */
   double   ndscal_f;    /* Number of days for future cal. period             */
   double   ndscal_b;    /* Number of days for backward cal. period           */
   int      nbias;       /* Number of biases */
