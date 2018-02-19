@@ -27,7 +27,8 @@ for line in ls:
     if case != -1: gpfile.append(line)
 while i<len(sys.argv):
     for filenm in gpfile:
-        file1=file(filenm,'r',1)
+#        file1=file(filenm,'r',1)
+        file1=open(filenm,'r',1)
         line=(file1.readline(-1))
         casex=line.find("xlabel '"+sys.argv[i]+"'")
         if casex!=-1:
@@ -40,10 +41,10 @@ if xopt:
     for filenm in filt: os.system('gnuplot -persist < '+filenm)
 #Write to ps
 if popt:
-    file1=file('gnuplot_'+sys.argv[1]+'_tmp.gp','w',1)
+    file1=open('gnuplot_'+sys.argv[1]+'_tmp.gp','w',1)
     file1.write('set term post;\n')
     for filenm in filt:
-        file2=file(filenm,'r',1)
+        file2=open(filenm,'r',1)
         for line in file2: file1.write(line)
         file2.close()
     file1.close()

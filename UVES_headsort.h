@@ -9,7 +9,7 @@
 
 /* DEFINITIONS */
 /* Version number */
-#define VERSION    0.56
+#define VERSION    0.58
 
 /* Functions */
 #define MAX(a,b)   a>b ? a : b

@@ -24,8 +24,8 @@ void usage(void) {
   fprintf(stderr,"\n%s: Sort ESO/VLT UVES exposures based on\n\
 \theader-card values\n",progname);
 
-  fprintf(stderr,"\nBy Michael Murphy (http://www.ast.cam.ac.uk/~mim)\n\
-\nVersion: %4.2lf (24 Aug 2016)\n",VERSION);
+  fprintf(stderr,"\nBy Michael Murphy (http://astronomy.swin.edu.au/~mmurphy)\n\
+\nVersion: %4.2lf (19 Feb 2018)\n",VERSION);
 
   fprintf(stderr,"\nUsage: %s [OPTIONS] [FITS file or list]\n", progname);
 

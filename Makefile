@@ -29,7 +29,7 @@ IP_OBJECTS = UVES_itphmod.o errormsg.o darray.o faskropen.o fcompl.o get_input.o
 
 WR_OBJECTS = UVES_wavres.o errormsg.o darray.o iarray.o isodd.o median.o nferrormsg.o qsort_darray.o stats.o strlower.o warnmsg.o
 
-UTILS = uves_changelinks.csh uves_filtplot.py uves_makesof.csh uves_copyhead.csh uves_itphmod.csh uves_itwavres.csh uves_wavcheck.csh uves_pmcheck.csh
+UTILS = uves_changelinks.csh uves_filtplot.py uves_makesof.csh uves_copyhead.csh uves_itphmod.csh uves_itwavres.csh uves_wavcheck.csh uves_modcpl.csh uves_pmcheck.csh
 
 all: $(HS_NAME) $(CH_NAME) $(IP_NAME) $(WR_NAME)
 

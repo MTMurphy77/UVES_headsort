@@ -209,7 +209,7 @@ disp_res*.dat *free*.dat resolution*.dat middummclear.prg dat.dat\n\
       if (scis[i].hdr.binx<2) tol=(dcwl<425.0) ? 0.075 : 0.065;
       else tol=(dcwl<425.0) ? 0.120 : 0.100;
 
-      /* Must redefine number of orders which pipeline is to find for the
+      /* Must redefine number of orders that pipeline is to find for the
 	 346/390 and 437 settings */
       if (dcwl<400.0) nord[0]=39;
       else if (!strcmp(scis[i].hdr.cwl,"437")) nord[0]=36;
@@ -219,7 +219,7 @@ disp_res*.dat *free*.dat resolution*.dat middummclear.prg dat.dat\n\
       else if (!strcmp(scis[i].hdr.cwl,"520") || !strcmp(scis[i].hdr.cwl,"750"))
 	nord[0]=30;
       else nord[0]=0;
-      /* Must redefine number of orders which pipeline is to find for the
+      /* Must redefine number of orders that pipeline is to find for the
 	 upper chip in the 564 & 860 settings */
       if (!strcmp(scis[i].hdr.cwl,"564")) nord[1]=19;
       else if (!strcmp(scis[i].hdr.cwl,"860")) nord[1]=10;
@@ -469,10 +469,11 @@ err_%s_sci%s%s.fits\n",obj,ci,arm2,obj,ci,arm2);
 	   be found in initial line search */
 	minlines=maxlines=0;
 	if (dcwl<360.0) {
-	  ;
+	  minlines=(scis[i].hdr.binx<2) ? 3250 : 2250;
+	  maxlines=(scis[i].hdr.binx<2) ? 4500 : 2750;
 	} else if (dcwl<420.0) {
-	  minlines=(scis[i].hdr.binx<2) ? 3500 : 0;
-	  maxlines=(scis[i].hdr.binx<2) ? 5000 : 0;
+	  minlines=(scis[i].hdr.binx<2) ? 3500 : 2500;
+	  maxlines=(scis[i].hdr.binx<2) ? 5000 : 3000;
 	} else if (dcwl<450.0) {
 	  ;
 	} else {
